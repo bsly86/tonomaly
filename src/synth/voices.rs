@@ -5,19 +5,49 @@ use crate::synth::effects::*;
 use crate::synth::adsr::*;
 
 pub struct Voice {
-    oscillator: Oscillator,
+    waveform: WaveformType,
+    osci: Oscillator,
     effects: EffectsChain,
     envelope: ADSR,
     frequency: f32,
+    sample_rate: f32,
+    is_active: bool,
 }
 
 impl Voice {
-    pub fn new(oscillator: Oscillator, effects: EffectsChain, envelope: ADSR, frequency: f32) -> Self {
+    
+    pub fn new(waveform: WaveformType, effects: EffectsChain, mut envelope: ADSR, frequency: f32, sample_rate: f32) -> Self {
+        
+        envelope.note_on();
+
+        let mut osci = match waveform {
+            WaveformType::Sine => Oscillator::Sine(Sine::new(frequency, sample_rate)),
+            WaveformType::Square => Oscillator::Square(Square::new(frequency, sample_rate, 0.5)),
+            WaveformType::Sawtooth => todo!(),
+            WaveformType::Triangle => todo!(),
+        };
+
+        
         Self {
-            oscillator,
+            waveform,
+            osci,
             effects,
             envelope,
-            frequency
+            frequency,
+            sample_rate,
+            is_active: true,
         }
+        
     }
+
+    pub fn next_sample(&mut self) -> f32 {
+        if !self.is_active && self.envelope.is_finished() {
+            return 0.0;
+        }
+
+        let mut sample = self.osci.next();
+        sample
+
+    }
+
 }

@@ -1,25 +1,34 @@
 /// goal: highly modular, simple enough to structure for application across various use cases
 
-use tonomaly::synth::oscillators::{Oscillatable, Oscillator, Square, Sine};
+use tonomaly::synth::oscillators::{Oscillatable, Oscillator, Square, Sine, WaveformType};
+
+use tonomaly::synth::voices::*;
+use tonomaly::synth::effects::*;
+use tonomaly::synth::adsr::*;
+
 use std::thread;
 use std::time::{Duration, Instant};
 
 fn main() {
-    let mut wave = Square::new(440.0, 44100.0, 0.5);
-    let sample_interval = Duration::from_secs_f32(1.0 / wave.get_sample_rate());
+
+    let envelope = ADSR::new(
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        44100.0,
+    );
+    
+    let voice = Voice::new(
+        WaveformType::Sine,
+        EffectsChain {  },
+        envelope,
+        440.0,
+        44100.0,
+    );
 
     thread::spawn(move || {
-        loop {
-            let start = Instant::now();
-            
-            let sample = wave.next();
-            println!("{sample}");
-
-            let elapsed = start.elapsed();
-            if elapsed < sample_interval {
-                thread::sleep(sample_interval - elapsed);
-            }
-        }
+        
     });
 
     loop {

@@ -20,6 +20,24 @@ pub enum Oscillator {
     Triangle(Triangle),
 }
 
+pub enum WaveformType {
+    Sine,
+    Square,
+    Sawtooth,
+    Triangle
+}
+
+impl Oscillator {
+    pub fn next(&mut self) -> f32 {
+        match self {
+            Oscillator::Sine(osc) => osc.next(),
+            Oscillator::Square(osc) => osc.next(),
+            Oscillator::Sawtooth(_) => todo!(),
+            Oscillator::Triangle(_) => todo!(),
+        }
+    }
+}
+
 /// Sine ///
 pub struct Sine {
     pub frequency: f32,

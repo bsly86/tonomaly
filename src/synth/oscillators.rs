@@ -1,3 +1,4 @@
+
 /// Essential keywords:
 /// frequency: the amount of times something happens within a set period; in this context, frequency is the number of cycles (0 -> 1 -> -1 -> 0) / second
 /// sample rate: the number of samples taken / second, a sample is a "snapshot" of the audio
@@ -20,6 +21,7 @@ pub enum Oscillator {
     Triangle(Triangle),
 }
 
+#[derive(Clone, Copy)]
 pub enum WaveformType {
     Sine,
     Square,
@@ -76,6 +78,10 @@ impl Oscillatable for Sine {
 
     fn set_phase_increment(&mut self) {
         self.phase_increment = self.frequency / self.sample_rate;
+        // Ensure phase increment is reasonable (Nyquist limit)
+        if self.phase_increment > 0.5 {
+            self.phase_increment = 0.5;
+        }
     }
 
     fn next(&mut self) -> f32 {
@@ -83,7 +89,7 @@ impl Oscillatable for Sine {
 
         self.phase += self.phase_increment; // how far into the cycle are we?
         if self.phase >= 1.0 {
-            self.phase = 0.0; // if phase >= 1, bring it back down to 0
+            self.phase -= 1.0; // subtract instead of setting to 0 to avoid phase jumps
         }
         sample // return sample
     }
@@ -140,7 +146,7 @@ impl Oscillatable for Square {
         
         self.phase += self.phase_increment; // how far into the cycle are we?
         if self.phase >= 1.0 {
-            self.phase = 0.0; // if phase >= 1, bring it back down to 0
+            self.phase -= 1.0; // subtract instead of setting to 0 to avoid phase jumps
         }
         sample // return sample
     }

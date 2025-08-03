@@ -1,6 +1,6 @@
 /// attack decay sustain release
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone)]
 pub enum ADSRstate {
     Inactive,
     Attack,
@@ -9,7 +9,7 @@ pub enum ADSRstate {
     Release
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone)]
 pub struct ADSR {
     // user configurable
     pub attack: f32, // time it takes to fade in
@@ -64,7 +64,8 @@ impl ADSR {
 
             ADSRstate::Attack => {
                 let attack_progress = self.time_in_state / self.attack;
-                self.current_amplitude = attack_progress;
+                // Use smooth curve instead of linear ramp
+                self.current_amplitude = 1.0 - (-3.0 * attack_progress).exp();
 
                 if self.time_in_state >= self.attack {
                     self.state = ADSRstate::Decay;
